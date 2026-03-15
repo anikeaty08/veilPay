@@ -185,6 +185,14 @@ npm run web:dev
 
 ## Deployment
 
+VeilPay is set up for a single Vercel deployment for both the frontend and the backend layer.
+
+- Frontend pages are served by Next.js.
+- Backend metadata endpoints are served by Next.js API routes under `apps/web/src/app/api`.
+- MongoDB stays external and stores only non-sensitive metadata.
+
+### 1. Deploy the contract
+
 Deploy the contract with:
 
 ```bash
@@ -198,6 +206,38 @@ npm run contracts:deploy:eth-sepolia
 ```
 
 Then place the deployed address into `NEXT_PUBLIC_VEILPAY_MANAGER_ADDRESS`.
+
+### 2. Deploy the web app to Vercel
+
+Use one Vercel project for the whole app.
+
+- Import the repo into Vercel
+- Keep the project rooted at the repo root
+- Vercel will use `vercel.json`
+- Build command: `npm run build`
+- Install command: `npm install`
+
+### 3. Add Vercel environment variables
+
+Add these variables in the Vercel project settings:
+
+```env
+NEXT_PUBLIC_VEILPAY_MANAGER_ADDRESS=0xa972B0a5D888e7DC4d5BB6c6C2939d1b452A5262
+NEXT_PUBLIC_VEILPAY_SETTLEMENT_TOKEN=0x0000000000000000000000000000000000000000
+NEXT_PUBLIC_VEILPAY_CHAIN=arb-sepolia
+NEXT_PUBLIC_VEILPAY_COFHE_ENV=TESTNET
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=5648480c5e251f33ae8ff1ecea236495
+MONGODB_URI=YOUR_MONGODB_CONNECTION_STRING
+MONGODB_DB=veilpay
+```
+
+For local app development, the same web envs belong in:
+
+- `apps/web/.env.local`
+
+The app-specific template is:
+
+- `apps/web/.env.example`
 
 ## Hackathon demo script
 
