@@ -212,10 +212,16 @@ Then place the deployed address into `NEXT_PUBLIC_VEILPAY_MANAGER_ADDRESS`.
 Use one Vercel project for the whole app.
 
 - Import the repo into Vercel
-- Keep the project rooted at the repo root
-- Vercel will use `vercel.json`
-- Build command: `npm run build`
-- Install command: `npm install`
+- Set the Vercel Root Directory to `apps/web`
+- Keep it as a single Next.js deployment
+- Frontend pages and backend API routes will deploy together
+
+Vercel project settings:
+
+- Framework Preset: `Next.js`
+- Root Directory: `apps/web`
+- Install Command: `npm install`
+- Build Command: `npm run build`
 
 ### 3. Add Vercel environment variables
 
