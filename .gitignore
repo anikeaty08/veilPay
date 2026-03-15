@@ -1,0 +1,12 @@
+node_modules
+package-lock.json
+apps/web/.next
+apps/web/node_modules
+packages/contracts/node_modules
+packages/contracts/artifacts
+packages/contracts/cache
+packages/contracts/coverage
+packages/contracts/typechain-types
+packages/contracts/deployments/*.json
+.env
+.DS_Store

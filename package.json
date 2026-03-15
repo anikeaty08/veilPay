@@ -1,0 +1,19 @@
+{
+  "name": "veilpay",
+  "private": true,
+  "scripts": {
+    "dev": "npm run --prefix apps/web dev",
+    "build": "npm run --prefix apps/web build",
+    "lint": "npm run --prefix apps/web lint",
+    "contracts:install": "npm install --prefix packages/contracts --legacy-peer-deps",
+    "contracts:clean": "npm run --prefix packages/contracts clean",
+    "contracts:compile": "npm run --prefix packages/contracts compile",
+    "contracts:test": "npm run --prefix packages/contracts test",
+    "contracts:deploy": "npm run --prefix packages/contracts deploy",
+    "contracts:deploy:eth-sepolia": "npm run --prefix packages/contracts deploy:eth-sepolia",
+    "contracts:deploy:arb-sepolia": "npm run --prefix packages/contracts deploy:arb-sepolia",
+    "web:install": "npm install --prefix apps/web",
+    "web:dev": "npm run --prefix apps/web dev",
+    "web:build": "npm run --prefix apps/web build"
+  }
+}
