@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
-import { Providers } from "@/components/providers";
+import dynamic from "next/dynamic";
 import "./globals.css";
+
+const Providers = dynamic(
+  () => import("@/components/providers").then((module) => module.Providers),
+  {
+    ssr: false,
+  },
+);
 
 export const metadata: Metadata = {
   title: "VeilPay",
