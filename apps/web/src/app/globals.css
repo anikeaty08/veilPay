@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0a1f1c;
+  --background: #f7fbfb;
+  --foreground: #0f2a27;
+  --accent: #18b7a1;
+  --accent-2: #6fe3d4;
+  --accent-3: #0f8d7c;
+  --panel: #ffffff;
+  --panel-2: #e9f7f4;
+  --border: rgba(15, 42, 39, 0.12);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Trebuchet MS", "Avenir Next", sans-serif;
+  --font-mono: "IBM Plex Mono", "Consolas", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+}
+
+::selection {
+  background: rgba(111, 240, 191, 0.24);
+  color: white;
+}
