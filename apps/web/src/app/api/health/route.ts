@@ -19,6 +19,7 @@ export async function GET() {
       getDisclosureGrantsCollection(),
       getSyncStateCollection(),
     ]);
+    await client.db(process.env.MONGODB_DB || "veilpay").command({ ping: 1 });
 
     const [metadataCount, activityCount, orgCount, grantCount, syncItems] = await Promise.all([
       metadata.estimatedDocumentCount(),
@@ -30,7 +31,7 @@ export async function GET() {
 
     return NextResponse.json({
       ok: true,
-      mongoConnected: client.topology != null,
+      mongoConnected: true,
       configured: {
         contractAddress: process.env.NEXT_PUBLIC_VEILPAY_MANAGER_ADDRESS || null,
         mongoDb: process.env.MONGODB_DB || "veilpay",
