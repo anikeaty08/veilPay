@@ -134,7 +134,8 @@ export default function DashboardPage() {
         </div>
       }
     >
-      <section className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(111,227,212,0.18))] p-6 shadow-[0_24px_60px_rgba(16,24,32,0.08)]">
+      <section className="relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(111,227,212,0.18))] p-6 shadow-[0_24px_60px_rgba(16,24,32,0.08)]">
+        <div className="pointer-events-none absolute right-[-3rem] top-[-2rem] h-28 w-28 rounded-full bg-[radial-gradient(circle,rgba(125,231,215,0.55),transparent_68%)] blur-2xl" />
         <div className="grid gap-6 xl:grid-cols-[1.35fr,0.85fr]">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">
@@ -220,7 +221,7 @@ export default function DashboardPage() {
           },
         ].map((card) => (
           <MotionItem key={card.label}>
-            <div className="rounded-[1.5rem] border border-[var(--border)] bg-white/85 p-4 shadow-[0_18px_40px_rgba(16,24,32,0.08)]">
+            <div className="rounded-[1.5rem] border border-[var(--border)] bg-[linear-gradient(145deg,rgba(255,255,255,0.88),rgba(244,252,250,0.82))] p-4 shadow-[0_18px_40px_rgba(16,24,32,0.08)]">
               <div className="flex items-center justify-between text-sm text-[var(--foreground)]/60">
                 {card.label}
                 {card.icon}
@@ -255,7 +256,7 @@ export default function DashboardPage() {
           },
         ].map((panel) => (
           <MotionItem key={panel.title}>
-            <section className="rounded-[1.6rem] border border-[var(--border)] bg-white/82 p-5 shadow-[0_18px_42px_rgba(16,24,32,0.08)]">
+            <section className="rounded-[1.6rem] border border-[var(--border)] bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(245,253,251,0.8))] p-5 shadow-[0_18px_42px_rgba(16,24,32,0.08)]">
               <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(24,183,161,0.16),rgba(111,227,212,0.28))]">
                 {panel.icon}
               </div>
@@ -300,7 +301,7 @@ export default function DashboardPage() {
         </MotionFade>
 
         <MotionFade delay={0.14}>
-          <section className="rounded-[1.75rem] border border-[var(--border)] bg-white/82 p-6 shadow-[0_18px_42px_rgba(16,24,32,0.08)]">
+          <section className="rounded-[1.75rem] border border-[var(--border)] bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(245,253,251,0.8))] p-6 shadow-[0_18px_42px_rgba(16,24,32,0.08)]">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]">
             Action stack
           </p>
@@ -371,7 +372,7 @@ export default function DashboardPage() {
           />
         </section>
 
-        <section className="rounded-[1.75rem] border border-[var(--border)] bg-white/82 p-6 shadow-[0_18px_42px_rgba(16,24,32,0.08)]">
+        <section className="rounded-[1.75rem] border border-[var(--border)] bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(245,253,251,0.8))] p-6 shadow-[0_18px_42px_rgba(16,24,32,0.08)]">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]">Activity feed</p>
           <div className="mt-4 space-y-3">
             {activityItems.slice(0, 8).map((item) => (

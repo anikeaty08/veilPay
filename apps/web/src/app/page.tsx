@@ -10,12 +10,14 @@ import {
   Users,
 } from "lucide-react";
 
+import { AmbientBackdrop } from "@/components/ambient-backdrop";
 import { MotionFade, MotionItem, MotionStagger } from "@/components/motion";
 import { VeilPayLogo } from "@/components/logo";
 
 export default function Home() {
   return (
     <main className="veil-grid min-h-screen px-4 py-6 text-[var(--foreground)] sm:px-6 lg:px-8">
+      <AmbientBackdrop />
       <div className="mx-auto max-w-7xl">
         <MotionFade>
           <header className="rounded-[2rem] border border-white/75 bg-white/74 px-5 py-4 shadow-[var(--shadow-soft)] backdrop-blur-2xl sm:px-6">
@@ -52,9 +54,11 @@ export default function Home() {
 
         <section className="mt-6 grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
           <MotionFade delay={0.08}>
-            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(233,251,247,0.9))] px-6 py-8 shadow-[var(--shadow-soft)] sm:px-8 sm:py-10">
+            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(233,251,247,0.9))] px-6 py-8 shadow-[var(--shadow-soft)] sm:px-8 sm:py-10 [transform-style:preserve-3d]">
               <div className="absolute -right-16 top-8 size-48 rounded-full bg-[radial-gradient(circle,rgba(125,231,215,0.7),transparent_62%)]" />
               <div className="absolute bottom-0 left-1/3 h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(25,182,162,0.18),transparent_70%)]" />
+              <div className="absolute right-10 top-10 h-24 w-24 rounded-[1.75rem] border border-white/50 bg-white/26 shadow-[0_20px_40px_rgba(16,24,32,0.08)] backdrop-blur-xl [transform:rotateY(-22deg)_rotateX(20deg)]" />
+              <div className="absolute bottom-10 right-28 h-16 w-16 rounded-[1.2rem] border border-white/45 bg-[linear-gradient(145deg,rgba(125,231,215,0.42),rgba(255,255,255,0.22))] backdrop-blur-xl [transform:rotateY(20deg)_rotateX(-18deg)]" />
               <div className="relative">
                 <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">
                   <Sparkles className="size-3.5" />
@@ -91,7 +95,7 @@ export default function Home() {
                     ["Why it matters", "Transparent rails leak salary bands, grants, and vendor rates."],
                   ].map(([title, body]) => (
                     <MotionItem key={title}>
-                      <article className="rounded-[1.6rem] border border-[var(--border)] bg-white/76 p-4 backdrop-blur-xl">
+                      <article className="rounded-[1.6rem] border border-[var(--border)] bg-white/76 p-4 shadow-[0_14px_28px_rgba(16,24,32,0.05)] backdrop-blur-xl">
                         <h2 className="text-base font-semibold">{title}</h2>
                         <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{body}</p>
                       </article>
@@ -237,8 +241,9 @@ export default function Home() {
 
         <MotionFade delay={0.3}>
           <footer className="mt-8 rounded-[2rem] border border-white/80 bg-white/78 px-6 py-8 shadow-[var(--shadow-soft)] backdrop-blur-2xl">
-            <div className="grid gap-8 lg:grid-cols-[1.5fr,1fr,1fr,1fr]">
-              <div>
+            <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+                <div className="max-w-md">
                 <div className="flex items-center gap-3">
                   <VeilPayLogo size={36} />
                   <div>
@@ -251,28 +256,31 @@ export default function Home() {
                 <p className="mt-4 max-w-sm text-sm leading-6 text-[var(--muted)]">
                   Built for teams that need privacy without leaving the EVM ecosystem.
                 </p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">Pages</p>
-                <div className="mt-4 space-y-3 text-sm text-[var(--muted)]">
-                  <Link href="/dashboard">Dashboard</Link>
-                  <Link href="/create">Create payout</Link>
-                  <Link href="/batch">Batch payroll</Link>
                 </div>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">Capabilities</p>
-                <div className="mt-4 space-y-3 text-sm text-[var(--muted)]">
-                  <p>Encrypted amounts</p>
-                  <p>Recipient inbox</p>
-                  <p>Selective disclosure</p>
+                <div className="grid gap-6 sm:grid-cols-3 xl:min-w-[540px]">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">Pages</p>
+                    <div className="mt-4 space-y-3 text-sm text-[var(--muted)]">
+                      <Link href="/dashboard">Dashboard</Link>
+                      <Link href="/create">Create payout</Link>
+                      <Link href="/batch">Batch payroll</Link>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">Capabilities</p>
+                    <div className="mt-4 space-y-3 text-sm text-[var(--muted)]">
+                      <p>Encrypted amounts</p>
+                      <p>Recipient inbox</p>
+                      <p>Selective disclosure</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">Positioning</p>
+                    <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                      Confidential, not anonymous. Operationally visible, financially protected.
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">Positioning</p>
-                <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
-                  Confidential, not anonymous. Operationally visible, financially protected.
-                </p>
               </div>
             </div>
           </footer>
