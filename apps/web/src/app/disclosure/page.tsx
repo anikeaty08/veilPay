@@ -106,17 +106,29 @@ export default function DisclosurePage() {
               </div>
               <MotionStagger className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
                 {[
-                  ["Creator records", String(creatorFeed.items.length), <Files className="size-4 text-[var(--accent-3)]" key="a" />],
-                  ["Viewer records", String(viewerFeed.items.length), <Eye className="size-4 text-[var(--accent-3)]" key="b" />],
-                  ["Disclosure events", String(disclosureActivity.length), <KeyRound className="size-4 text-[var(--accent-3)]" key="c" />],
-                ].map(([label, value, icon]) => (
-                  <MotionItem key={label}>
+                  {
+                    label: "Creator records",
+                    value: String(creatorFeed.items.length),
+                    icon: <Files className="size-4 text-[var(--accent-3)]" />,
+                  },
+                  {
+                    label: "Viewer records",
+                    value: String(viewerFeed.items.length),
+                    icon: <Eye className="size-4 text-[var(--accent-3)]" />,
+                  },
+                  {
+                    label: "Disclosure events",
+                    value: String(disclosureActivity.length),
+                    icon: <KeyRound className="size-4 text-[var(--accent-3)]" />,
+                  },
+                ].map((item) => (
+                  <MotionItem key={item.label}>
                     <div className="rounded-[1.25rem] border border-[var(--border)] bg-white/82 px-4 py-4 shadow-[var(--shadow-card)]">
                       <div className="flex items-center justify-between text-sm text-[var(--muted)]">
-                        <span>{label}</span>
-                        {icon}
+                        <span>{item.label}</span>
+                        {item.icon}
                       </div>
-                      <p className="mt-3 text-2xl font-semibold text-[var(--foreground)]">{value}</p>
+                      <p className="mt-3 text-2xl font-semibold text-[var(--foreground)]">{item.value}</p>
                     </div>
                   </MotionItem>
                 ))}
