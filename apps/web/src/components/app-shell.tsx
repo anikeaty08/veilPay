@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  ArrowRight,
   Building2,
   Files,
   Grid2X2,
@@ -49,7 +48,7 @@ export function AppShell({
           <header className="sticky top-4 z-30 mb-8">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-4 border-b border-white/65 pb-4 xl:flex-row xl:items-center xl:justify-between">
-                <div className="flex flex-col gap-3">
+                <div>
                   <Link
                     className="inline-flex items-center gap-3 text-lg font-semibold tracking-tight text-[var(--foreground)]"
                     href="/"
@@ -64,18 +63,8 @@ export function AppShell({
                       </span>
                     </span>
                   </Link>
-                  <p className="max-w-2xl text-sm text-[var(--muted)]">
-                    Confidential payouts, payroll, and treasury operations on EVM using FHE.
-                  </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/88 px-4 py-2.5 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-card)] transition hover:-translate-y-0.5"
-                    href="/create"
-                  >
-                    Launch payout
-                    <ArrowRight className="size-4" />
-                  </Link>
                   <WalletButton />
                 </div>
               </div>
@@ -104,12 +93,6 @@ export function AppShell({
                   })}
                   </div>
                 </nav>
-
-                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--accent-3)]">
-                  <span className="rounded-full bg-white/55 px-3 py-2">Encrypted amounts</span>
-                  <span className="rounded-full bg-white/45 px-3 py-2">Permit-based disclosure</span>
-                  <span className="rounded-full bg-white/45 px-3 py-2">Minimal public metadata</span>
-                </div>
               </div>
             </div>
           </header>

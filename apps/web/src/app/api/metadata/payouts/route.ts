@@ -1,33 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import {
-  payoutActivitySchema,
+  disclosureGrantSchema,
   payoutMetadataDocumentSchema,
   payoutMetadataUpsertSchema,
   payoutWorkflowUpdateSchema,
 } from "@/lib/metadata";
+import { buildActivityEventKey, writeActivityEvent } from "@/lib/backend";
 import {
-  getActivityCollection,
+  getDisclosureGrantsCollection,
   getMetadataCollection,
   sanitizeMongoDocument,
 } from "@/lib/mongodb";
 
 export async function GET(request: NextRequest) {
   try {
+    const collection = await getMetadataCollection();
     const ids = request.nextUrl.searchParams
       .get("ids")
       ?.split(",")
       .filter(Boolean)
       .map((value) => Number(value))
       .filter((value) => Number.isFinite(value));
+    const role = request.nextUrl.searchParams.get("role");
+    const actor = request.nextUrl.searchParams.get("actor")?.toLowerCase();
+    const organizationSlug = request.nextUrl.searchParams.get("organizationSlug");
+    const workflowStatus = request.nextUrl.searchParams.get("workflowStatus");
+    const query = request.nextUrl.searchParams.get("query")?.trim().toLowerCase();
+    const limit = Math.min(Number(request.nextUrl.searchParams.get("limit")) || 50, 100);
+    const page = Math.max(Number(request.nextUrl.searchParams.get("page")) || 1, 1);
 
-    if (!ids?.length) {
-      return NextResponse.json({ items: [] });
+    const filter: Record<string, unknown> = {};
+    if (ids?.length) {
+      filter.payoutId = { $in: ids };
+    }
+    if (organizationSlug) {
+      filter.organizationSlug = organizationSlug;
+    }
+    if (workflowStatus) {
+      filter.workflowStatus = workflowStatus;
+    }
+    if (role === "creator" && actor) {
+      filter.creator = actor;
+    }
+    if ((role === "recipient" || role === "viewer") && actor) {
+      filter.recipient = actor;
+    }
+    if (query) {
+      filter.$or = [
+        { label: { $regex: query, $options: "i" } },
+        { organizationName: { $regex: query, $options: "i" } },
+        { teamName: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } },
+        { reference: { $regex: query, $options: "i" } },
+        { tags: { $elemMatch: { $regex: query, $options: "i" } } },
+      ];
     }
 
-    const collection = await getMetadataCollection();
     const rawItems = await collection
-      .find({ payoutId: { $in: ids } })
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
       .toArray();
     const items = rawItems
       .map((item) => sanitizeMongoDocument(item))
@@ -80,15 +114,15 @@ export async function POST(request: NextRequest) {
       })),
     );
 
-    const activityCollection = await getActivityCollection();
-    await activityCollection.insertMany(
+    await Promise.all(
       normalizedItems.map((item) =>
-        payoutActivitySchema.parse({
-          payoutId: item.payoutId,
+        writeActivityEvent({
+          payoutId: item.payoutId ?? 0,
           actor: item.creator,
           action: "created",
           organizationSlug: item.organizationSlug,
           createdAt: now,
+          eventKey: buildActivityEventKey(["created", item.metadataHash, item.payoutId]),
         }),
       ),
     );
@@ -120,7 +154,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const collection = await getMetadataCollection();
-    const activityCollection = await getActivityCollection();
+    const disclosureGrantsCollection = await getDisclosureGrantsCollection();
     const now = new Date().toISOString();
 
     const record = await collection.findOne({ payoutId: parsed.data.payoutId });
@@ -150,8 +184,7 @@ export async function PATCH(request: NextRequest) {
       },
     );
 
-    await activityCollection.insertOne(
-      payoutActivitySchema.parse({
+    await writeActivityEvent({
         payoutId: parsed.data.payoutId,
         actor: parsed.data.actor,
         action: parsed.data.action,
@@ -159,8 +192,33 @@ export async function PATCH(request: NextRequest) {
         note: parsed.data.note,
         target: parsed.data.target ?? parsed.data.addDisclosureViewer,
         createdAt: now,
-      }),
-    );
+        eventKey: buildActivityEventKey([
+          parsed.data.action,
+          parsed.data.payoutId,
+          parsed.data.actor,
+          parsed.data.target ?? parsed.data.addDisclosureViewer,
+          parsed.data.note,
+        ]),
+      });
+
+    if (parsed.data.addDisclosureViewer) {
+      await disclosureGrantsCollection.updateOne(
+        { payoutId: parsed.data.payoutId, viewer: parsed.data.addDisclosureViewer },
+        {
+          $set: disclosureGrantSchema.parse({
+            payoutId: parsed.data.payoutId,
+            organizationSlug: record.organizationSlug,
+            grantedBy: parsed.data.actor,
+            viewer: parsed.data.addDisclosureViewer,
+            status: "active",
+            note: parsed.data.note,
+            grantedAt: now,
+            updatedAt: now,
+          }),
+        },
+        { upsert: true },
+      );
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {

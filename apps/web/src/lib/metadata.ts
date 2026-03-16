@@ -78,6 +78,7 @@ export const payoutActivitySchema = z.object({
   organizationSlug: z.string().trim().min(1).max(40).default("default-org"),
   note: z.string().trim().max(140).optional(),
   target: addressSchema.optional(),
+  eventKey: z.string().trim().min(1).max(180).optional(),
   createdAt: z.string().datetime(),
 });
 
@@ -92,5 +93,70 @@ export const payoutWorkflowUpdateSchema = z.object({
   addDisclosureViewer: addressSchema.optional(),
 });
 
+export const organizationSchema = z.object({
+  slug: z.string().trim().min(1).max(40),
+  name: z.string().trim().min(1).max(80),
+  treasuryAdmin: addressSchema,
+  financeViewers: z.array(addressSchema).max(20).default([]),
+  auditors: z.array(addressSchema).max(20).default([]),
+  tags: z.array(z.string().trim().min(1).max(24)).max(12).default([]),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const organizationUpsertSchema = z.object({
+  slug: z.string().trim().min(1).max(40),
+  name: z.string().trim().min(1).max(80),
+  treasuryAdmin: addressSchema,
+  financeViewers: z.array(addressSchema).max(20).optional(),
+  auditors: z.array(addressSchema).max(20).optional(),
+  tags: z.array(z.string().trim().min(1).max(24)).max(12).optional(),
+});
+
+export const disclosureGrantSchema = z.object({
+  payoutId: z.number().int().positive(),
+  organizationSlug: z.string().trim().min(1).max(40),
+  grantedBy: addressSchema,
+  viewer: addressSchema,
+  status: z.enum(["active", "revoked"]).default("active"),
+  note: z.string().trim().max(140).optional(),
+  grantedAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const syncStateSchema = z.object({
+  syncKey: z.string().trim().min(1).max(120),
+  chainId: z.number().int().positive(),
+  contractAddress: addressSchema,
+  lastProcessedBlock: z.number().int().nonnegative().default(0),
+  lastProcessedTxHash: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{64}$/)
+    .transform((value) => value.toLowerCase())
+    .optional(),
+  lastProcessedLogIndex: z.number().int().nonnegative().optional(),
+  status: z.enum(["idle", "syncing", "healthy", "degraded", "error"]).default("idle"),
+  lastSyncAt: z.string().datetime(),
+  lastError: z.string().trim().max(240).optional(),
+});
+
+export const syncStateUpsertSchema = z.object({
+  syncKey: z.string().trim().min(1).max(120),
+  chainId: z.number().int().positive(),
+  contractAddress: addressSchema,
+  lastProcessedBlock: z.number().int().nonnegative(),
+  lastProcessedTxHash: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{64}$/)
+    .transform((value) => value.toLowerCase())
+    .optional(),
+  lastProcessedLogIndex: z.number().int().nonnegative().optional(),
+  status: syncStateSchema.shape.status.optional(),
+  lastError: z.string().trim().max(240).optional(),
+});
+
 export type PayoutMetadata = z.infer<typeof payoutMetadataDocumentSchema>;
 export type PayoutActivity = z.infer<typeof payoutActivitySchema>;
+export type OrganizationRecord = z.infer<typeof organizationSchema>;
+export type DisclosureGrant = z.infer<typeof disclosureGrantSchema>;
+export type SyncState = z.infer<typeof syncStateSchema>;

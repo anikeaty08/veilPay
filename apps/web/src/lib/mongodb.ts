@@ -1,11 +1,24 @@
 import { MongoClient, type Collection, type Document } from "mongodb";
 
-import type { PayoutActivity, PayoutMetadata } from "@/lib/metadata";
+import type {
+  DisclosureGrant,
+  OrganizationRecord,
+  PayoutActivity,
+  PayoutMetadata,
+  SyncState,
+} from "@/lib/metadata";
 
 declare global {
   var _veilPayMongoClientPromise: Promise<MongoClient> | undefined;
   var _veilPayMetadataReadyPromise: Promise<Collection<PayoutMetadata>> | undefined;
   var _veilPayActivityReadyPromise: Promise<Collection<PayoutActivity>> | undefined;
+  var _veilPayOrganizationsReadyPromise: Promise<Collection<OrganizationRecord>> | undefined;
+  var _veilPayDisclosureGrantsReadyPromise: Promise<Collection<DisclosureGrant>> | undefined;
+  var _veilPaySyncStateReadyPromise: Promise<Collection<SyncState>> | undefined;
+}
+
+function getDb() {
+  return getMongoClient().then((client) => client.db(process.env.MONGODB_DB || "veilpay"));
 }
 
 export async function getMongoClient() {
@@ -23,9 +36,7 @@ export async function getMongoClient() {
 }
 
 async function ensureMetadataCollection() {
-  const client = await getMongoClient();
-  const dbName = process.env.MONGODB_DB || "veilpay";
-  const db = client.db(dbName);
+  const db = await getDb();
   const collectionName = "payout_metadata";
 
   const collections = await db
@@ -155,9 +166,7 @@ export async function getMetadataCollection() {
 }
 
 async function ensureActivityCollection() {
-  const client = await getMongoClient();
-  const dbName = process.env.MONGODB_DB || "veilpay";
-  const db = client.db(dbName);
+  const db = await getDb();
   const collectionName = "payout_activity";
 
   const collections = await db
@@ -184,6 +193,96 @@ export async function getActivityCollection() {
   }
 
   return global._veilPayActivityReadyPromise;
+}
+
+async function ensureOrganizationsCollection() {
+  const db = await getDb();
+  const collectionName = "organizations";
+  const collections = await db
+    .listCollections({ name: collectionName }, { nameOnly: true })
+    .toArray();
+
+  if (!collections.length) {
+    await db.createCollection(collectionName);
+  }
+
+  const collection = db.collection<OrganizationRecord>(collectionName);
+  await Promise.all([
+    collection.createIndex({ slug: 1 }, { unique: true, name: "uniq_org_slug" }),
+    collection.createIndex({ treasuryAdmin: 1 }, { name: "org_admin" }),
+    collection.createIndex({ updatedAt: -1 }, { name: "org_updated_at" }),
+  ]);
+
+  return collection;
+}
+
+export async function getOrganizationsCollection() {
+  if (!global._veilPayOrganizationsReadyPromise) {
+    global._veilPayOrganizationsReadyPromise = ensureOrganizationsCollection();
+  }
+
+  return global._veilPayOrganizationsReadyPromise;
+}
+
+async function ensureDisclosureGrantsCollection() {
+  const db = await getDb();
+  const collectionName = "disclosure_grants";
+  const collections = await db
+    .listCollections({ name: collectionName }, { nameOnly: true })
+    .toArray();
+
+  if (!collections.length) {
+    await db.createCollection(collectionName);
+  }
+
+  const collection = db.collection<DisclosureGrant>(collectionName);
+  await Promise.all([
+    collection.createIndex(
+      { payoutId: 1, viewer: 1 },
+      { unique: true, name: "uniq_payout_viewer_grant" },
+    ),
+    collection.createIndex({ organizationSlug: 1, grantedAt: -1 }, { name: "grant_org_created" }),
+    collection.createIndex({ grantedBy: 1, grantedAt: -1 }, { name: "grant_granted_by" }),
+  ]);
+
+  return collection;
+}
+
+export async function getDisclosureGrantsCollection() {
+  if (!global._veilPayDisclosureGrantsReadyPromise) {
+    global._veilPayDisclosureGrantsReadyPromise = ensureDisclosureGrantsCollection();
+  }
+
+  return global._veilPayDisclosureGrantsReadyPromise;
+}
+
+async function ensureSyncStateCollection() {
+  const db = await getDb();
+  const collectionName = "sync_state";
+  const collections = await db
+    .listCollections({ name: collectionName }, { nameOnly: true })
+    .toArray();
+
+  if (!collections.length) {
+    await db.createCollection(collectionName);
+  }
+
+  const collection = db.collection<SyncState>(collectionName);
+  await Promise.all([
+    collection.createIndex({ syncKey: 1 }, { unique: true, name: "uniq_sync_key" }),
+    collection.createIndex({ chainId: 1, contractAddress: 1 }, { name: "sync_chain_contract" }),
+    collection.createIndex({ status: 1, lastSyncAt: -1 }, { name: "sync_status" }),
+  ]);
+
+  return collection;
+}
+
+export async function getSyncStateCollection() {
+  if (!global._veilPaySyncStateReadyPromise) {
+    global._veilPaySyncStateReadyPromise = ensureSyncStateCollection();
+  }
+
+  return global._veilPaySyncStateReadyPromise;
 }
 
 export function sanitizeMongoDocument<T extends Document>(document: T) {
