@@ -17,6 +17,12 @@ const connectors = projectId
       walletConnect({
         projectId,
         showQrModal: true,
+        metadata: {
+          name: "VeilPay",
+          description: "Confidential payouts, payroll, and treasury operations on EVM using FHE.",
+          url: "https://veilpay.app",
+          icons: ["https://veilpay.app/icon.png"],
+        },
       }),
       metaMask(),
       injected(),

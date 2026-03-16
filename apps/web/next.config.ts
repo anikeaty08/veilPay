@@ -5,11 +5,7 @@ const nextConfig: NextConfig = {
   experimental: {
     webpackBuildWorker: false,
   },
-  turbopack: {
-    // Vercel sets `outputFileTracingRoot` to the repo root (e.g. `/vercel/path0`).
-    // Keep Turbopack aligned so builds don't loop on the mismatch warning.
-    root: path.resolve(__dirname, "../.."),
-  },
+  outputFileTracingRoot: path.resolve(__dirname, "../.."),
   webpack: (config, { isServer }) => {
     config.experiments = {
       ...config.experiments,
@@ -33,11 +29,6 @@ const nextConfig: NextConfig = {
       child_process: false,
       "@react-native-async-storage/async-storage": false,
     };
-
-    config.externals = [
-      ...(config.externals || []),
-      "@metamask/sdk",
-    ];
 
     if (isServer) {
       config.output.webassemblyModuleFilename = "./../static/wasm/[modulehash].wasm";

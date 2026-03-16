@@ -48,22 +48,21 @@ export function WalletButton() {
   const metaMaskConnector = connectors.find((connector) => connector.id === "metaMask");
   const injectedConnector = connectors.find((connector) => connector.id === "injected");
 
-  async function handleConnect(connectorId: "walletConnect" | "extension") {
+  async function connectWalletConnect() {
     const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "";
-
-    if (connectorId === "walletConnect") {
-      if (!projectId || !wcConnector) {
-        toast.error("WalletConnect project id is missing in apps/web/.env.local");
-        return;
-      }
-      try {
-        await connectAsync({ connector: wcConnector });
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Unable to open WalletConnect");
-      }
+    if (!projectId || !wcConnector) {
+      toast.error("WalletConnect project id is missing in apps/web/.env.local");
       return;
     }
 
+    try {
+      await connectAsync({ connector: wcConnector });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to open WalletConnect");
+    }
+  }
+
+  async function connectExtension() {
     const connector = metaMaskConnector || injectedConnector;
     if (!connector) {
       toast.error("No browser wallet detected.");
@@ -99,16 +98,26 @@ export function WalletButton() {
       <button
         className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-2))] px-4 py-2 text-sm font-semibold text-[var(--ink)] shadow-[0_12px_30px_rgba(24,183,161,0.22)] transition hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
         disabled={isPending}
-        onClick={() => handleConnect("extension")}
+        onClick={async () => {
+          // Prefer browser extensions (MetaMask/Rainbow/etc). Fall back to WalletConnect QR.
+          const hasInjected =
+            typeof window !== "undefined" &&
+            typeof (window as unknown as { ethereum?: unknown }).ethereum !== "undefined";
+          if (hasInjected && (metaMaskConnector || injectedConnector)) {
+            await connectExtension();
+          } else {
+            await connectWalletConnect();
+          }
+        }}
         type="button"
       >
         {extensionBusy ? <Loader2 className="size-4 animate-spin" /> : <Wallet className="size-4" />}
-        {extensionBusy ? "Opening wallet..." : "Connect Extension"}
+        {extensionBusy ? "Opening wallet..." : "Connect Wallet"}
       </button>
       <button
         className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/85 px-4 py-2 text-sm font-medium text-[var(--foreground)] shadow-[0_12px_30px_rgba(16,24,32,0.06)] transition hover:-translate-y-0.5 hover:border-[var(--accent)]/40 disabled:cursor-not-allowed disabled:opacity-70"
         disabled={isPending}
-        onClick={() => handleConnect("walletConnect")}
+        onClick={() => connectWalletConnect()}
         type="button"
       >
         {walletConnectBusy ? <Loader2 className="size-4 animate-spin" /> : <QrCode className="size-4" />}
