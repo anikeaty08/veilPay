@@ -18,11 +18,13 @@ import {
   veilPayManagerAbi,
   veilPayManagerAddress,
 } from "@/lib/contracts/veilpay";
-import type { PayoutMetadata } from "@/lib/metadata";
+import type { PayoutActivity, PayoutMetadata } from "@/lib/metadata";
 import { parseDecimalToUnits, toUnixTimestamp } from "@/lib/utils";
+import { useWorkspaceProfile } from "@/lib/workspace";
 
 export function useVeilPayRuntime() {
   const { address, chain, isConnected } = useAccount();
+  const workspace = useWorkspaceProfile();
   const publicClient = usePublicClient({ chainId: configuredChain.id });
   const { data: walletClient } = useWalletClient({ chainId: configuredChain.id });
   const [permitReady, setPermitReady] = useState(false);
@@ -75,9 +77,48 @@ export function useVeilPayRuntime() {
     }
   }
 
+  async function updateWorkflow(input: {
+    payoutId: number;
+    action: "approved" | "marked_ready" | "revealed" | "claimed" | "shared_disclosure" | "refreshed";
+    workflowStatus?: "drafted" | "needs_review" | "ready" | "shared" | "completed" | "cancelled";
+    note?: string;
+    target?: Address;
+    incrementApprovalCount?: boolean;
+    addDisclosureViewer?: Address;
+  }) {
+    if (!address) {
+      throw new Error("Wallet or contract is not ready");
+    }
+
+    const response = await fetch("/api/metadata/payouts", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        payoutId: input.payoutId,
+        actor: address,
+        action: input.action,
+        workflowStatus: input.workflowStatus,
+        note: input.note,
+        target: input.target,
+        incrementApprovalCount: input.incrementApprovalCount,
+        addDisclosureViewer: input.addDisclosureViewer,
+      }),
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(payload?.error || "Failed to update workflow");
+    }
+  }
+
   async function createSinglePayout(input: {
     recipient: Address;
+    organizationSlug: string;
     organizationName: string;
+    teamName: string;
+    costCenter: string;
     label: string;
     category: string;
     amount: string;
@@ -86,6 +127,9 @@ export function useVeilPayRuntime() {
     tokenDecimals: number;
     currencySymbol: string;
     settlementToken?: Address;
+    requiredApprovals: number;
+    assignedReviewer?: Address;
+    tags: string[];
     reference?: string;
     attachmentUrl?: string;
   }) {
@@ -141,7 +185,10 @@ export function useVeilPayRuntime() {
           metadataHash,
           creator: address,
           recipient: input.recipient,
+          organizationSlug: input.organizationSlug,
           organizationName: input.organizationName,
+          teamName: input.teamName,
+          costCenter: input.costCenter,
           label: input.label,
           category: input.category,
           dueDate,
@@ -149,6 +196,13 @@ export function useVeilPayRuntime() {
           kind: input.kind,
           tokenDecimals: input.tokenDecimals,
           currencySymbol: input.currencySymbol,
+          requiredApprovals: input.requiredApprovals,
+          approvalCount: 0,
+          workflowStatus: input.requiredApprovals > 1 ? "needs_review" : "ready",
+          assignedReviewer: input.assignedReviewer,
+          disclosureSharedWith: [],
+          tags: input.tags,
+          latestAction: "created",
           reference: input.reference,
           attachmentUrl: input.attachmentUrl,
         },
@@ -167,7 +221,10 @@ export function useVeilPayRuntime() {
   async function createBatchPayouts(input: {
     rows: Array<{
       recipient: Address;
+      organizationSlug: string;
       organizationName: string;
+      teamName: string;
+      costCenter: string;
       label: string;
       category: string;
       amount: string;
@@ -180,6 +237,9 @@ export function useVeilPayRuntime() {
     currencySymbol: string;
     settlementToken?: Address;
     batchLabel: string;
+    requiredApprovals: number;
+    assignedReviewer?: Address;
+    tags: string[];
   }) {
     if (!publicClient || !walletClient || !address || !veilPayManagerAddress) {
       throw new Error("Wallet or contract is not ready");
@@ -252,20 +312,30 @@ export function useVeilPayRuntime() {
         metadataItems.map((item, index) => ({
           payoutId: Number(payoutLogs[index]?.args?.payoutId ?? BigInt(0)),
           batchId,
-          metadataHash: item.metadataHash,
-          creator: address,
-          recipient: item.recipient,
-          organizationName: item.organizationName,
-          label: item.label,
-          category: item.category,
-          dueDate: item.dueDate,
-          settlementToken,
-          kind: input.kind,
-          tokenDecimals: input.tokenDecimals,
-          currencySymbol: input.currencySymbol,
-          reference: item.reference,
-          attachmentUrl: item.attachmentUrl,
-        })),
+        metadataHash: item.metadataHash,
+        creator: address,
+        recipient: item.recipient,
+        organizationSlug: item.organizationSlug,
+        organizationName: item.organizationName,
+        teamName: item.teamName,
+        costCenter: item.costCenter,
+        label: item.label,
+        category: item.category,
+        dueDate: item.dueDate,
+        settlementToken,
+        kind: input.kind,
+        tokenDecimals: input.tokenDecimals,
+        currencySymbol: input.currencySymbol,
+        requiredApprovals: input.requiredApprovals,
+        approvalCount: 0,
+        workflowStatus: input.requiredApprovals > 1 ? "needs_review" : "ready",
+        assignedReviewer: input.assignedReviewer,
+        disclosureSharedWith: [],
+        tags: input.tags,
+        latestAction: "created",
+        reference: item.reference,
+        attachmentUrl: item.attachmentUrl,
+      })),
       );
     } catch (error) {
       toast.error(
@@ -300,7 +370,13 @@ export function useVeilPayRuntime() {
       args: [BigInt(payoutId)],
     });
 
-    return publicClient.waitForTransactionReceipt({ hash });
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    await updateWorkflow({
+      payoutId,
+      action: "claimed",
+      workflowStatus: "completed",
+    }).catch(() => undefined);
+    return receipt;
   }
 
   async function grantAccess(payoutId: number, viewer: Address) {
@@ -317,12 +393,21 @@ export function useVeilPayRuntime() {
       args: [BigInt(payoutId), viewer],
     });
 
-    return publicClient.waitForTransactionReceipt({ hash });
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    await updateWorkflow({
+      payoutId,
+      action: "shared_disclosure",
+      workflowStatus: "shared",
+      target: viewer,
+      addDisclosureViewer: viewer,
+    }).catch(() => undefined);
+    return receipt;
   }
 
   return {
     address,
     chain,
+    workspace,
     configuredChain,
     contractAddress: veilPayManagerAddress,
     contractReady: Boolean(veilPayManagerAddress && publicClient),
@@ -346,6 +431,7 @@ export function useVeilPayRuntime() {
     revealAmount,
     claimPayout,
     grantAccess,
+    updateWorkflow,
   };
 }
 
@@ -402,4 +488,55 @@ export function usePayoutDetail(payoutId: number) {
   }, [payoutId, refresh]);
 
   return { item, loading, refresh };
+}
+
+export function useActivityFeed(organizationSlug?: string, payoutId?: number) {
+  const [items, setItems] = useState<PayoutActivity[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (organizationSlug) params.set("organizationSlug", organizationSlug);
+      if (payoutId) params.set("payoutId", String(payoutId));
+      params.set("limit", payoutId ? "12" : "20");
+
+      const response = await fetch(`/api/metadata/activity?${params.toString()}`, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        setItems([]);
+        return;
+      }
+
+      const payload = (await response.json()) as { items: PayoutActivity[] };
+      setItems(payload.items);
+    } finally {
+      setLoading(false);
+    }
+  }, [organizationSlug, payoutId]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  return { items, loading, refresh };
+}
+
+export function useLiveRefresh(refresh: () => Promise<void> | void, intervalMs = 15000) {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void refresh();
+      }
+    }, intervalMs);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [intervalMs, refresh]);
 }

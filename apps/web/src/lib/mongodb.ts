@@ -1,10 +1,11 @@
 import { MongoClient, type Collection, type Document } from "mongodb";
 
-import type { PayoutMetadata } from "@/lib/metadata";
+import type { PayoutActivity, PayoutMetadata } from "@/lib/metadata";
 
 declare global {
   var _veilPayMongoClientPromise: Promise<MongoClient> | undefined;
   var _veilPayMetadataReadyPromise: Promise<Collection<PayoutMetadata>> | undefined;
+  var _veilPayActivityReadyPromise: Promise<Collection<PayoutActivity>> | undefined;
 }
 
 export async function getMongoClient() {
@@ -151,6 +152,38 @@ export async function getMetadataCollection() {
   }
 
   return global._veilPayMetadataReadyPromise;
+}
+
+async function ensureActivityCollection() {
+  const client = await getMongoClient();
+  const dbName = process.env.MONGODB_DB || "veilpay";
+  const db = client.db(dbName);
+  const collectionName = "payout_activity";
+
+  const collections = await db
+    .listCollections({ name: collectionName }, { nameOnly: true })
+    .toArray();
+
+  if (!collections.length) {
+    await db.createCollection(collectionName);
+  }
+
+  const collection = db.collection<PayoutActivity>(collectionName);
+  await Promise.all([
+    collection.createIndex({ payoutId: 1, createdAt: -1 }, { name: "payout_created_at" }),
+    collection.createIndex({ actor: 1, createdAt: -1 }, { name: "actor_created_at" }),
+    collection.createIndex({ organizationSlug: 1, createdAt: -1 }, { name: "org_created_at" }),
+  ]);
+
+  return collection;
+}
+
+export async function getActivityCollection() {
+  if (!global._veilPayActivityReadyPromise) {
+    global._veilPayActivityReadyPromise = ensureActivityCollection();
+  }
+
+  return global._veilPayActivityReadyPromise;
 }
 
 export function sanitizeMongoDocument<T extends Document>(document: T) {

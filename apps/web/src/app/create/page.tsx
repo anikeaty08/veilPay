@@ -16,7 +16,10 @@ export default function CreatePage() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [form, setForm] = useState({
     recipient: "",
+    organizationSlug: "north-star-dao",
     organizationName: "",
+    teamName: "Operations",
+    costCenter: "Treasury",
     label: "",
     category: "Contractor",
     amount: "",
@@ -24,6 +27,9 @@ export default function CreatePage() {
     kind: "0",
     tokenDecimals: "6",
     currencySymbol: "USDC",
+    requiredApprovals: "2",
+    assignedReviewer: "",
+    tags: "payroll,confidential",
     reference: "",
     attachmentUrl: "",
   });
@@ -33,7 +39,10 @@ export default function CreatePage() {
       setSubmitting(true);
       const result = await runtime.createSinglePayout({
         recipient: form.recipient as Address,
+        organizationSlug: form.organizationSlug,
         organizationName: form.organizationName,
+        teamName: form.teamName,
+        costCenter: form.costCenter,
         label: form.label,
         category: form.category,
         amount: form.amount,
@@ -41,6 +50,12 @@ export default function CreatePage() {
         kind: Number(form.kind),
         tokenDecimals: Number(form.tokenDecimals),
         currencySymbol: form.currencySymbol,
+        requiredApprovals: Number(form.requiredApprovals),
+        assignedReviewer: (form.assignedReviewer || undefined) as Address | undefined,
+        tags: form.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean),
         reference: form.reference || undefined,
         attachmentUrl: form.attachmentUrl || undefined,
       });
@@ -70,7 +85,10 @@ export default function CreatePage() {
             <div className="mt-5 grid gap-4 lg:grid-cols-2">
               {[
                 ["Recipient wallet", "recipient", "0x..."],
+                ["Organization slug", "organizationSlug", "north-star-dao"],
                 ["Organization", "organizationName", "North Star DAO"],
+                ["Team", "teamName", "Operations"],
+                ["Cost center", "costCenter", "Treasury"],
                 ["Label", "label", "April contractor payout"],
                 ["Category", "category", "Contractor"],
                 ["Amount", "amount", "4200.00"],
@@ -97,6 +115,9 @@ export default function CreatePage() {
               {[
                 ["Token decimals", "tokenDecimals", "6"],
                 ["Currency symbol", "currencySymbol", "USDC"],
+                ["Required approvals", "requiredApprovals", "2"],
+                ["Assigned reviewer", "assignedReviewer", "0x..."],
+                ["Tags", "tags", "payroll,confidential"],
                 ["Reference", "reference", "INV-042"],
                 ["Attachment URL", "attachmentUrl", "https://"],
               ].map(([label, key, placeholder]) => (

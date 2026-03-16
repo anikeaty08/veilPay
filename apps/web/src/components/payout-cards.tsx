@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CircleDollarSign, FileClock, ShieldCheck } from "lucide-react";
+import { CircleDollarSign, FileClock, ShieldCheck, Users } from "lucide-react";
 
 import { entryKindLabels, statusLabels, type PayoutRecord } from "@/lib/contracts/veilpay";
 import { formatTimestamp } from "@/lib/utils";
@@ -72,6 +72,16 @@ export function PayoutCards({
               <p className="text-[var(--foreground)]/50">Record</p>
               <p className="mt-1">#{item.summary.id}</p>
             </div>
+            <div>
+              <p className="text-[var(--foreground)]/50">Workflow</p>
+              <p className="mt-1">{item.metadata?.workflowStatus || "needs_review"}</p>
+            </div>
+            <div>
+              <p className="text-[var(--foreground)]/50">Approvals</p>
+              <p className="mt-1">
+                {(item.metadata?.approvalCount ?? 0)}/{item.metadata?.requiredApprovals ?? 1}
+              </p>
+            </div>
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -87,6 +97,20 @@ export function PayoutCards({
               <CircleDollarSign className="size-3 text-[var(--accent-3)]" />
               {entryKindLabels[item.summary.kind]}
             </span>
+            {item.metadata?.teamName ? (
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--panel-2)] px-3 py-1 text-xs text-[var(--foreground)]/70">
+                <Users className="size-3 text-[var(--accent-3)]" />
+                {item.metadata.teamName}
+              </span>
+            ) : null}
+            {item.metadata?.tags?.slice(0, 2).map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center rounded-full border border-[var(--border)] bg-white/80 px-3 py-1 text-xs text-[var(--foreground)]/70"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">

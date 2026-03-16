@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowRight,
@@ -18,28 +18,57 @@ import {
 
 import { AppShell } from "@/components/app-shell";
 import { PayoutCards } from "@/components/payout-cards";
-import { formatTokenAmount, formatTimestamp } from "@/lib/utils";
-import { useRolePayoutFeed, useVeilPayRuntime } from "@/lib/use-veilpay";
+import { shortAddress, formatTokenAmount, formatTimestamp } from "@/lib/utils";
+import { useActivityFeed, useLiveRefresh, useRolePayoutFeed, useVeilPayRuntime } from "@/lib/use-veilpay";
 
 export default function DashboardPage() {
   const runtime = useVeilPayRuntime();
   const { items, loading, refresh } = useRolePayoutFeed("creator");
+  const { items: activityItems, refresh: refreshActivity } = useActivityFeed(
+    runtime.workspace.profile.organizationSlug,
+  );
   const [revealingId, setRevealingId] = useState<number | null>(null);
   const [revealedAmounts, setRevealedAmounts] = useState<Record<number, string>>({});
+  const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
+
+  useLiveRefresh(async () => {
+    await Promise.all([refresh(), refreshActivity()]);
+  }, 12000);
 
   const stats = useMemo(() => {
     const total = items.length;
     const pending = items.filter((item) => item.summary.status === 0).length;
     const claimed = items.filter((item) => item.summary.status === 1).length;
+    const review = items.filter((item) => item.metadata?.workflowStatus === "needs_review").length;
     const last = items[0]?.summary?.createdAt ?? 0;
 
     return {
       total,
       pending,
       claimed,
+      review,
       lastActivity: last ? formatTimestamp(last) : "No activity yet",
     };
   }, [items]);
+
+  const filteredItems = useMemo(() => {
+    const normalized = deferredQuery.trim().toLowerCase();
+    if (!normalized) return items;
+
+    return items.filter((item) =>
+      [
+        item.metadata?.label,
+        item.metadata?.organizationName,
+        item.metadata?.teamName,
+        item.metadata?.category,
+        item.metadata?.reference,
+        ...(item.metadata?.tags ?? []),
+      ]
+        .filter(Boolean)
+        .some((value) => value?.toLowerCase().includes(normalized)),
+    );
+  }, [deferredQuery, items]);
 
   async function handleReveal(item: (typeof items)[number]) {
     try {
@@ -57,6 +86,21 @@ export default function DashboardPage() {
       toast.error(error instanceof Error ? error.message : "Unable to reveal amount");
     } finally {
       setRevealingId(null);
+    }
+  }
+
+  async function handleApprove(payoutId: number) {
+    try {
+      await runtime.updateWorkflow({
+        payoutId,
+        action: "approved",
+        workflowStatus: "ready",
+        incrementApprovalCount: true,
+      });
+      toast.success(`Payout #${payoutId} approved for execution`);
+      await Promise.all([refresh(), refreshActivity()]);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to approve payout");
     }
   }
 
@@ -165,6 +209,11 @@ export default function DashboardPage() {
             icon: <ShieldCheck className="size-4 text-[var(--accent)]" />,
           },
           {
+            label: "Needs review",
+            value: stats.review,
+            icon: <BriefcaseBusiness className="size-4 text-[var(--accent-3)]" />,
+          },
+          {
             label: "Last activity",
             value: stats.lastActivity,
             icon: <ArrowUpRight className="size-4 text-[var(--accent-2)]" />,
@@ -201,8 +250,8 @@ export default function DashboardPage() {
           },
           {
             eyebrow: "Status guidance",
-            title: "Move claims before their due date",
-            body: "Use the inbox to verify recipient visibility and keep payouts from sitting in pending longer than planned.",
+            title: "Move reviews before release",
+            body: "Use internal workflow statuses and approvals so payroll runs are production-safe before recipients claim them.",
             icon: <Clock3 className="size-5 text-[var(--accent-3)]" />,
           },
         ].map((panel) => (
@@ -276,15 +325,71 @@ export default function DashboardPage() {
         </section>
       </div>
 
-      <div className="mt-10">
-        <PayoutCards
-          items={items}
-          revealedAmounts={revealedAmounts}
-          onReveal={handleReveal}
-          revealingId={revealingId}
-          emptyTitle="No live payouts yet"
-          emptyBody="Connect the configured chain and create your first confidential payout or payroll batch."
-        />
+      <div className="mt-10 grid gap-4 xl:grid-cols-[1.3fr,0.9fr]">
+        <section>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-xl font-semibold text-[var(--foreground)]">Treasury queue</h3>
+              <p className="mt-1 text-sm text-[var(--foreground)]/68">
+                Filter by organization, team, tags, or reference to review the live payout queue.
+              </p>
+              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[var(--accent-3)]">
+                Workspace role: {runtime.workspace.profile.role}
+              </p>
+            </div>
+            <input
+              className="w-full max-w-xs rounded-full border border-[var(--border)] bg-white/85 px-4 py-2 text-sm outline-none"
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search queue..."
+              value={query}
+            />
+          </div>
+          <PayoutCards
+            items={filteredItems}
+            revealedAmounts={revealedAmounts}
+            onReveal={handleReveal}
+            revealingId={revealingId}
+            emptyTitle="No live payouts yet"
+            emptyBody="Connect the configured chain and create your first confidential payout or payroll batch."
+            footerAction={(item) =>
+              item.metadata?.workflowStatus === "needs_review" && runtime.workspace.permissions.canApprove ? (
+                <button
+                  className="rounded-full border border-[var(--border)] bg-[var(--panel-2)] px-4 py-2 text-sm text-[var(--foreground)]/80"
+                  onClick={() => handleApprove(item.summary.id)}
+                  type="button"
+                >
+                  Approve workflow
+                </button>
+              ) : item.metadata?.workflowStatus === "needs_review" ? (
+                <span className="rounded-full border border-[var(--border)] bg-white/80 px-4 py-2 text-sm text-[var(--foreground)]/60">
+                  Approval requires reviewer access
+                </span>
+              ) : null
+            }
+          />
+        </section>
+
+        <section className="rounded-[1.75rem] border border-[var(--border)] bg-white/82 p-6 shadow-[0_18px_42px_rgba(16,24,32,0.08)]">
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]">Activity feed</p>
+          <div className="mt-4 space-y-3">
+            {activityItems.slice(0, 8).map((item) => (
+              <div
+                key={`${item.payoutId}-${item.createdAt}-${item.action}`}
+                className="rounded-[1.2rem] border border-[var(--border)] bg-[var(--panel)] px-4 py-4"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-sm font-semibold text-[var(--foreground)]">
+                    #{item.payoutId} {item.action.replaceAll("_", " ")}
+                  </p>
+                  <p className="text-xs text-[var(--foreground)]/55">{item.createdAt.slice(0, 10)}</p>
+                </div>
+                <p className="mt-2 text-sm text-[var(--foreground)]/68">
+                  {shortAddress(item.actor)} {item.note ? `- ${item.note}` : ""}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </AppShell>
   );

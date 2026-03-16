@@ -15,6 +15,12 @@ export default function BatchPage() {
   const runtime = useVeilPayRuntime();
   const [csv, setCsv] = useState(starterRows);
   const [batchLabel, setBatchLabel] = useState("April payroll run");
+  const [organizationSlug, setOrganizationSlug] = useState("north-star-dao");
+  const [teamName, setTeamName] = useState("Operations");
+  const [costCenter, setCostCenter] = useState("Payroll");
+  const [requiredApprovals, setRequiredApprovals] = useState("2");
+  const [assignedReviewer, setAssignedReviewer] = useState("");
+  const [tags, setTags] = useState("payroll,monthly");
   const [tokenDecimals, setTokenDecimals] = useState("6");
   const [currencySymbol, setCurrencySymbol] = useState("USDC");
   const [submitting, setSubmitting] = useState(false);
@@ -32,7 +38,10 @@ export default function BatchPage() {
           row.split(",");
         return {
           recipient: recipient.trim() as Address,
+          organizationSlug: organizationSlug.trim(),
           organizationName: organizationName.trim(),
+          teamName: teamName.trim(),
+          costCenter: costCenter.trim(),
           label: label.trim(),
           category: category.trim(),
           amount: amount.trim(),
@@ -47,6 +56,9 @@ export default function BatchPage() {
         tokenDecimals: Number(tokenDecimals),
         currencySymbol,
         batchLabel,
+        requiredApprovals: Number(requiredApprovals),
+        assignedReviewer: (assignedReviewer || undefined) as Address | undefined,
+        tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean),
       });
 
       toast.success(`Batch #${result.batchId} created`);
@@ -71,6 +83,55 @@ export default function BatchPage() {
         />
       </label>
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <label className="block text-sm text-white/75">
+          <span className="font-medium text-white">Organization slug</span>
+          <input
+            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
+            onChange={(event) => setOrganizationSlug(event.target.value)}
+            value={organizationSlug}
+          />
+        </label>
+        <label className="block text-sm text-white/75">
+          <span className="font-medium text-white">Team</span>
+          <input
+            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
+            onChange={(event) => setTeamName(event.target.value)}
+            value={teamName}
+          />
+        </label>
+        <label className="block text-sm text-white/75">
+          <span className="font-medium text-white">Cost center</span>
+          <input
+            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
+            onChange={(event) => setCostCenter(event.target.value)}
+            value={costCenter}
+          />
+        </label>
+        <label className="block text-sm text-white/75">
+          <span className="font-medium text-white">Required approvals</span>
+          <input
+            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
+            onChange={(event) => setRequiredApprovals(event.target.value)}
+            value={requiredApprovals}
+          />
+        </label>
+        <label className="block text-sm text-white/75">
+          <span className="font-medium text-white">Assigned reviewer</span>
+          <input
+            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
+            onChange={(event) => setAssignedReviewer(event.target.value)}
+            placeholder="0x..."
+            value={assignedReviewer}
+          />
+        </label>
+        <label className="block text-sm text-white/75">
+          <span className="font-medium text-white">Tags</span>
+          <input
+            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
+            onChange={(event) => setTags(event.target.value)}
+            value={tags}
+          />
+        </label>
         <label className="block text-sm text-white/75">
           <span className="font-medium text-white">Token decimals</span>
           <input
