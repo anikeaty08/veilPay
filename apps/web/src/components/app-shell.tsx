@@ -81,7 +81,8 @@ export function AppShell({
               </div>
 
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                <nav className="flex flex-wrap gap-1.5">
+                <nav className="overflow-x-auto pb-1">
+                  <div className="flex min-w-max flex-nowrap items-center gap-2.5 sm:gap-3">
                   {navigation.map((item) => {
                     const active = pathname.startsWith(item.href);
                     const Icon = item.icon;
@@ -91,8 +92,8 @@ export function AppShell({
                         key={item.href}
                         className={
                           active
-                            ? "inline-flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-2))] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] shadow-[0_14px_28px_rgba(25,182,162,0.18)]"
-                            : "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-[var(--foreground)]/72 transition hover:bg-white/45 hover:text-[var(--foreground)]"
+                            ? "inline-flex shrink-0 items-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-2))] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] shadow-[0_14px_28px_rgba(25,182,162,0.18)]"
+                            : "inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-[var(--foreground)]/72 transition hover:bg-white/45 hover:text-[var(--foreground)]"
                         }
                         href={item.href}
                       >
@@ -101,6 +102,7 @@ export function AppShell({
                       </Link>
                     );
                   })}
+                  </div>
                 </nav>
 
                 <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--accent-3)]">

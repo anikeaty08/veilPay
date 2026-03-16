@@ -36,7 +36,8 @@ html {
 
 body {
   background:
-    radial-gradient(circle at top left, rgba(125, 231, 215, 0.38), transparent 28%),
+    radial-gradient(circle at top left, rgba(255, 204, 128, 0.22), transparent 24%),
+    radial-gradient(circle at left center, rgba(242, 146, 84, 0.12), transparent 20%),
     radial-gradient(circle at top right, rgba(25, 182, 162, 0.18), transparent 24%),
     linear-gradient(180deg, #f7fdfc 0%, #f2faf8 52%, #edf8f6 100%);
   color: var(--foreground);

@@ -31,7 +31,8 @@ export default function Home() {
                   </p>
                 </div>
               </Link>
-              <nav className="flex flex-wrap gap-2">
+              <nav className="overflow-x-auto pb-1">
+                <div className="flex min-w-max flex-nowrap items-center gap-2.5 sm:gap-3">
                 {[
                   { href: "/dashboard", label: "Dashboard" },
                   { href: "/create", label: "Create payout" },
@@ -41,12 +42,13 @@ export default function Home() {
                 ].map((item) => (
                   <Link
                     key={item.href}
-                    className="rounded-full border border-[var(--border)] bg-white/82 px-4 py-2 text-sm font-medium text-[var(--foreground)]/78 transition hover:-translate-y-0.5"
+                    className="shrink-0 rounded-full border border-[var(--border)] bg-white/82 px-4 py-2 text-sm font-medium text-[var(--foreground)]/78 transition hover:-translate-y-0.5"
                     href={item.href}
                   >
                     {item.label}
                   </Link>
                 ))}
+                </div>
               </nav>
             </div>
           </header>
