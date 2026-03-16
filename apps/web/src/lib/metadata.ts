@@ -93,6 +93,13 @@ export const payoutWorkflowUpdateSchema = z.object({
   addDisclosureViewer: addressSchema.optional(),
 });
 
+export const adminRequestContextSchema = z.object({
+  requestedBy: addressSchema,
+  requestId: z.string().trim().min(1).max(120).optional(),
+  requestedAt: z.string().datetime().optional(),
+  signature: z.string().trim().min(1).max(240).optional(),
+});
+
 export const organizationSchema = z.object({
   slug: z.string().trim().min(1).max(40),
   name: z.string().trim().min(1).max(80),
@@ -118,10 +125,24 @@ export const disclosureGrantSchema = z.object({
   organizationSlug: z.string().trim().min(1).max(40),
   grantedBy: addressSchema,
   viewer: addressSchema,
-  status: z.enum(["active", "revoked"]).default("active"),
+  status: z.enum(["active", "expired", "revoked"]).default("active"),
   note: z.string().trim().max(140).optional(),
+  expiresAt: z.string().datetime().optional(),
+  revokedAt: z.string().datetime().optional(),
+  revokeReason: z.string().trim().max(140).optional(),
   grantedAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
+});
+
+export const disclosureGrantMutationSchema = z.object({
+  payoutId: z.number().int().positive(),
+  viewer: addressSchema,
+  status: disclosureGrantSchema.shape.status.optional(),
+  note: z.string().trim().max(140).optional(),
+  expiresAt: z.string().datetime().optional(),
+  revokeReason: z.string().trim().max(140).optional(),
+  requestedBy: addressSchema,
+  requestId: z.string().trim().min(1).max(120).optional(),
 });
 
 export const syncStateSchema = z.object({
