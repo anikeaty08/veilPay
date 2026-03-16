@@ -2,7 +2,7 @@
 
 import { Loader2, LogOut, QrCode, Wallet } from "lucide-react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 
 function shortAddress(value?: string) {
@@ -16,10 +16,10 @@ export function WalletButton() {
     connectAsync,
     connectors,
     isPending,
-    pendingConnector,
     error,
   } = useConnect();
   const { disconnect } = useDisconnect();
+  const [activeConnector, setActiveConnector] = useState<"walletConnect" | "extension" | null>(null);
   const mounted = useSyncExternalStore(
     () => () => undefined,
     () => true,
@@ -56,9 +56,12 @@ export function WalletButton() {
     }
 
     try {
+      setActiveConnector("walletConnect");
       await connectAsync({ connector: wcConnector });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to open WalletConnect");
+    } finally {
+      setActiveConnector(null);
     }
   }
 
@@ -70,14 +73,17 @@ export function WalletButton() {
     }
 
     try {
+      setActiveConnector("extension");
       await connectAsync({ connector });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to connect wallet");
+    } finally {
+      setActiveConnector(null);
     }
   }
 
-  const extensionBusy = isPending && pendingConnector?.id !== "walletConnect";
-  const walletConnectBusy = isPending && pendingConnector?.id === "walletConnect";
+  const extensionBusy = isPending && activeConnector === "extension";
+  const walletConnectBusy = isPending && activeConnector === "walletConnect";
 
   if (isConnected) {
     return (

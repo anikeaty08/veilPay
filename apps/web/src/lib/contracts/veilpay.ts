@@ -46,6 +46,24 @@ type SummaryShape = {
 };
 
 type ParsedLogs = Parameters<typeof parseEventLogs>[0]["logs"];
+type PayoutCreatedLog = {
+  args?: {
+    payoutId?: bigint;
+    batchId?: bigint;
+    creator?: Address;
+    recipient?: Address;
+  };
+};
+type BatchCreatedLog = {
+  args?: {
+    batchId?: bigint;
+    creator?: Address;
+  };
+};
+
+function asSummaryShape(value: unknown): SummaryShape {
+  return value as SummaryShape;
+}
 
 function normalizePayoutSummary(raw: SummaryShape, amountHandle: bigint): PayoutSummary {
   return {
@@ -129,7 +147,7 @@ export async function fetchRolePayouts(
   ]);
 
   return summaries.map((summary, index) => {
-    const normalized = normalizePayoutSummary(summary, handles[index] as bigint);
+    const normalized = normalizePayoutSummary(asSummaryShape(summary), handles[index] as bigint);
     return {
       summary: normalized,
       metadata: metadataMap.get(normalized.id) ?? null,
@@ -159,7 +177,7 @@ export async function fetchPayoutById(
   ]);
 
   const metadataMap = await fetchMetadata([payoutId]);
-  const normalized = normalizePayoutSummary(summary, amountHandle as bigint);
+  const normalized = normalizePayoutSummary(asSummaryShape(summary), amountHandle as bigint);
 
   return {
     summary: normalized,
@@ -186,7 +204,7 @@ export function extractPayoutCreatedLogs(logs: ParsedLogs) {
     abi: veilPayManagerAbi,
     logs,
     eventName: "PayoutCreated",
-  });
+  }) as PayoutCreatedLog[];
 }
 
 export function extractBatchCreatedLogs(logs: ParsedLogs) {
@@ -194,5 +212,5 @@ export function extractBatchCreatedLogs(logs: ParsedLogs) {
     abi: veilPayManagerAbi,
     logs,
     eventName: "BatchCreated",
-  });
+  }) as BatchCreatedLog[];
 }

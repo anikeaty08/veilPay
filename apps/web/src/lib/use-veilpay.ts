@@ -132,7 +132,7 @@ export function useVeilPayRuntime() {
 
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
     const payoutLog = extractPayoutCreatedLogs(receipt.logs).at(-1);
-    const payoutId = Number(payoutLog?.args.payoutId ?? 0n);
+    const payoutId = Number(payoutLog?.args?.payoutId ?? BigInt(0));
 
     try {
       await storeMetadata([
@@ -245,12 +245,12 @@ export function useVeilPayRuntime() {
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
     const payoutLogs = extractPayoutCreatedLogs(receipt.logs);
     const batchLog = extractBatchCreatedLogs(receipt.logs).at(-1);
-    const batchId = Number(batchLog?.args.batchId ?? 0n);
+    const batchId = Number(batchLog?.args?.batchId ?? BigInt(0));
 
     try {
       await storeMetadata(
         metadataItems.map((item, index) => ({
-          payoutId: Number(payoutLogs[index]?.args.payoutId ?? 0n),
+          payoutId: Number(payoutLogs[index]?.args?.payoutId ?? BigInt(0)),
           batchId,
           metadataHash: item.metadataHash,
           creator: address,
