@@ -35,7 +35,7 @@ export function WalletButton() {
   if (!mounted) {
     return (
       <button
-        className="inline-flex items-center gap-2 rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--ink)]"
+        className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-2))] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] shadow-[0_14px_32px_rgba(25,182,162,0.22)]"
         type="button"
       >
         <Wallet className="size-4" />
@@ -88,7 +88,7 @@ export function WalletButton() {
   if (isConnected) {
     return (
       <button
-        className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/85 px-4 py-2 text-sm font-medium text-[var(--foreground)] shadow-[0_12px_30px_rgba(16,24,32,0.08)] transition hover:border-[var(--accent)]/40 hover:shadow-[0_16px_32px_rgba(24,183,161,0.12)]"
+        className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/88 px-4 py-2.5 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-card)] transition hover:border-[var(--accent)]/40 hover:shadow-[0_16px_32px_rgba(24,183,161,0.12)]"
         onClick={() => disconnect()}
         type="button"
       >
@@ -102,7 +102,7 @@ export function WalletButton() {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <button
-        className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-2))] px-4 py-2 text-sm font-semibold text-[var(--ink)] shadow-[0_12px_30px_rgba(24,183,161,0.22)] transition hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+        className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-2))] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] shadow-[0_14px_32px_rgba(25,182,162,0.22)] transition hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
         disabled={isPending}
         onClick={async () => {
           // Prefer browser extensions (MetaMask/Rainbow/etc). Fall back to WalletConnect QR.
@@ -121,7 +121,7 @@ export function WalletButton() {
         {extensionBusy ? "Opening wallet..." : "Connect Wallet"}
       </button>
       <button
-        className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/85 px-4 py-2 text-sm font-medium text-[var(--foreground)] shadow-[0_12px_30px_rgba(16,24,32,0.06)] transition hover:-translate-y-0.5 hover:border-[var(--accent)]/40 disabled:cursor-not-allowed disabled:opacity-70"
+        className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/88 px-4 py-2.5 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:border-[var(--accent)]/40 disabled:cursor-not-allowed disabled:opacity-70"
         disabled={isPending}
         onClick={() => connectWalletConnect()}
         type="button"

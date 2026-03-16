@@ -1,10 +1,12 @@
 "use client";
 
+import { Building2, CheckCircle2, FileSpreadsheet, ShieldCheck, Sparkles, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { Address } from "viem";
 
 import { AppShell } from "@/components/app-shell";
+import { MotionFade, MotionItem, MotionStagger } from "@/components/motion";
 import { useVeilPayRuntime } from "@/lib/use-veilpay";
 
 const starterRows = `recipient,organizationName,label,category,amount,dueDate,reference
@@ -69,104 +71,132 @@ export default function BatchPage() {
     }
   }
 
+  const details = [
+    ["Batch label", batchLabel, setBatchLabel, "April payroll run"],
+    ["Organization slug", organizationSlug, setOrganizationSlug, "north-star-dao"],
+    ["Team", teamName, setTeamName, "Operations"],
+    ["Cost center", costCenter, setCostCenter, "Payroll"],
+    ["Required approvals", requiredApprovals, setRequiredApprovals, "2"],
+    ["Assigned reviewer", assignedReviewer, setAssignedReviewer, "0x..."],
+    ["Tags", tags, setTags, "payroll,monthly"],
+    ["Token decimals", tokenDecimals, setTokenDecimals, "6"],
+    ["Currency symbol", currencySymbol, setCurrencySymbol, "USDC"],
+  ] as const;
+
   return (
     <AppShell
       title="Batch payroll or grant run"
-      description="Paste a CSV to create a confidential payroll or grant batch while keeping each allocation encrypted."
+      description="Upload a multi-recipient run with encrypted allocations, workflow controls, and cleaner finance ops metadata."
+      icon={<Building2 className="size-5" />}
     >
-      <label className="block text-sm text-white/75">
-        <span className="font-medium text-white">Batch label</span>
-        <input
-          className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
-          onChange={(event) => setBatchLabel(event.target.value)}
-          value={batchLabel}
-        />
-      </label>
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <label className="block text-sm text-white/75">
-          <span className="font-medium text-white">Organization slug</span>
-          <input
-            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
-            onChange={(event) => setOrganizationSlug(event.target.value)}
-            value={organizationSlug}
-          />
-        </label>
-        <label className="block text-sm text-white/75">
-          <span className="font-medium text-white">Team</span>
-          <input
-            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
-            onChange={(event) => setTeamName(event.target.value)}
-            value={teamName}
-          />
-        </label>
-        <label className="block text-sm text-white/75">
-          <span className="font-medium text-white">Cost center</span>
-          <input
-            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
-            onChange={(event) => setCostCenter(event.target.value)}
-            value={costCenter}
-          />
-        </label>
-        <label className="block text-sm text-white/75">
-          <span className="font-medium text-white">Required approvals</span>
-          <input
-            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
-            onChange={(event) => setRequiredApprovals(event.target.value)}
-            value={requiredApprovals}
-          />
-        </label>
-        <label className="block text-sm text-white/75">
-          <span className="font-medium text-white">Assigned reviewer</span>
-          <input
-            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
-            onChange={(event) => setAssignedReviewer(event.target.value)}
-            placeholder="0x..."
-            value={assignedReviewer}
-          />
-        </label>
-        <label className="block text-sm text-white/75">
-          <span className="font-medium text-white">Tags</span>
-          <input
-            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
-            onChange={(event) => setTags(event.target.value)}
-            value={tags}
-          />
-        </label>
-        <label className="block text-sm text-white/75">
-          <span className="font-medium text-white">Token decimals</span>
-          <input
-            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
-            onChange={(event) => setTokenDecimals(event.target.value)}
-            value={tokenDecimals}
-          />
-        </label>
-        <label className="block text-sm text-white/75">
-          <span className="font-medium text-white">Currency symbol</span>
-          <input
-            className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none"
-            onChange={(event) => setCurrencySymbol(event.target.value)}
-            value={currencySymbol}
-          />
-        </label>
-      </div>
-      <label className="mt-4 block text-sm text-white/75">
-        <span className="font-medium text-white">
-          CSV format: recipient,organizationName,label,category,amount,dueDate,reference
-        </span>
-        <textarea
-          className="mt-3 min-h-72 w-full rounded-[1.5rem] border border-white/10 bg-black/20 px-4 py-4 font-mono text-sm outline-none"
-          onChange={(event) => setCsv(event.target.value)}
-          value={csv}
-        />
-      </label>
-      <div className="mt-6">
-        <button
-          className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--ink)]"
-          onClick={() => submit()}
-          type="button"
-        >
-          {submitting ? "Encrypting batch..." : "Create confidential batch"}
-        </button>
+      <div className="grid gap-5 xl:grid-cols-[1.2fr,0.8fr]">
+        <div className="space-y-5">
+          <MotionFade delay={0.04}>
+            <section className="rounded-[1.8rem] border border-[var(--border)] bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(237,251,248,0.88))] p-6 shadow-[var(--shadow-card)]">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/78 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-3)]">
+                    <Sparkles className="size-3.5" />
+                    Batch command center
+                  </div>
+                  <h2 className="mt-4 text-3xl font-semibold tracking-tight">
+                    Run payroll, grants, or multi-recipient treasury disbursements from one structured upload.
+                  </h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+                    Keep each allocation encrypted while preserving the operational metadata your finance team
+                    needs for routing, review, and auditing.
+                  </p>
+                </div>
+                <button
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-2))] px-5 py-3 text-sm font-semibold text-[var(--ink)] shadow-[0_14px_32px_rgba(25,182,162,0.22)]"
+                  onClick={() => submit()}
+                  type="button"
+                >
+                  <Upload className="size-4" />
+                  {submitting ? "Encrypting batch..." : "Create confidential batch"}
+                </button>
+              </div>
+            </section>
+          </MotionFade>
+
+          <MotionStagger className="grid gap-4 lg:grid-cols-2">
+            {details.map(([label, value, setter, placeholder]) => (
+              <MotionItem key={label}>
+                <label className="block rounded-[1.5rem] border border-[var(--border)] bg-white/82 p-4 shadow-[var(--shadow-card)]">
+                  <span className="text-sm font-medium text-[var(--foreground)]">{label}</span>
+                  <input
+                    className="mt-3 w-full rounded-[1rem] border border-[var(--border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--foreground)]/34"
+                    onChange={(event) => setter(event.target.value)}
+                    placeholder={placeholder}
+                    value={value}
+                  />
+                </label>
+              </MotionItem>
+            ))}
+          </MotionStagger>
+
+          <MotionFade delay={0.12}>
+            <section className="rounded-[1.8rem] border border-[var(--border)] bg-white/84 p-5 shadow-[var(--shadow-soft)]">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex size-11 items-center justify-center rounded-[1.1rem] bg-[var(--accent-4)] text-[var(--accent-3)]">
+                  <FileSpreadsheet className="size-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">CSV upload</p>
+                  <p className="text-sm text-[var(--muted)]">
+                    Format: recipient, organizationName, label, category, amount, dueDate, reference
+                  </p>
+                </div>
+              </div>
+              <textarea
+                className="mt-4 min-h-80 w-full rounded-[1.5rem] border border-[var(--border)] bg-[var(--panel-3)] px-4 py-4 font-mono text-sm text-[var(--foreground)] outline-none"
+                onChange={(event) => setCsv(event.target.value)}
+                value={csv}
+              />
+            </section>
+          </MotionFade>
+        </div>
+
+        <div className="space-y-5">
+          <MotionFade delay={0.1}>
+            <section className="rounded-[1.8rem] border border-[var(--border)] bg-white/84 p-6 shadow-[var(--shadow-card)]">
+              <div className="flex items-center gap-3 text-[var(--foreground)]">
+                <ShieldCheck className="size-5 text-[var(--accent-3)]" />
+                <p className="text-base font-semibold">Batch safeguards</p>
+              </div>
+              <div className="mt-5 space-y-3">
+                {[
+                  "Each payout amount is encrypted before submission.",
+                  "Operational routing stays visible without exposing every allocation.",
+                  "Reviewer and approval metadata keep large runs controlled.",
+                  "Recipient claims happen from the private inbox after creation.",
+                ].map((item) => (
+                  <div key={item} className="flex gap-3 rounded-[1.2rem] border border-[var(--border)] bg-[var(--panel-2)] px-4 py-4">
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[var(--accent-3)]" />
+                    <p className="text-sm leading-6 text-[var(--muted)]">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </MotionFade>
+
+          <MotionFade delay={0.16}>
+            <section className="rounded-[1.8rem] border border-[var(--border)] bg-[linear-gradient(145deg,rgba(25,182,162,0.12),rgba(255,255,255,0.88))] p-6 shadow-[var(--shadow-card)]">
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]">Operator notes</p>
+              <div className="mt-4 space-y-3">
+                {[
+                  "Use a real reviewer address when finance approvals are required.",
+                  "Keep CSV labels human-readable so recipients and auditors understand what each line item represents.",
+                  "Set tags and cost centers up front so reporting views stay useful later.",
+                ].map((note) => (
+                  <div key={note} className="rounded-[1.2rem] border border-[var(--border)] bg-white/84 px-4 py-4 text-sm leading-6 text-[var(--muted)]">
+                    {note}
+                  </div>
+                ))}
+              </div>
+            </section>
+          </MotionFade>
+        </div>
       </div>
     </AppShell>
   );

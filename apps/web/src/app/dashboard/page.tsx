@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
+import { MotionFade, MotionItem, MotionStagger } from "@/components/motion";
 import { PayoutCards } from "@/components/payout-cards";
 import { shortAddress, formatTokenAmount, formatTimestamp } from "@/lib/utils";
 import { useActivityFeed, useLiveRefresh, useRolePayoutFeed, useVeilPayRuntime } from "@/lib/use-veilpay";
@@ -134,7 +135,7 @@ export default function DashboardPage() {
       }
     >
       <section className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(111,227,212,0.18))] p-6 shadow-[0_24px_60px_rgba(16,24,32,0.08)]">
-        <div className="grid gap-6 xl:grid-cols-[1.3fr,0.9fr]">
+        <div className="grid gap-6 xl:grid-cols-[1.35fr,0.85fr]">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">
               <Sparkles className="size-3.5" />
@@ -164,7 +165,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid gap-3 rounded-[1.75rem] border border-[var(--border)] bg-white/70 p-4">
+          <MotionStagger className="grid gap-3 rounded-[1.75rem] border border-[var(--border)] bg-white/70 p-4">
             {[
               {
                 title: "What stays encrypted",
@@ -179,19 +180,18 @@ export default function DashboardPage() {
                 body: "Create one live payout, then share a permitted reveal with an auditor for the demo.",
               },
             ].map((item) => (
-              <div
-                key={item.title}
-                className="rounded-[1.25rem] border border-[var(--border)] bg-[var(--panel)] p-4"
-              >
-                <p className="text-sm font-semibold text-[var(--foreground)]">{item.title}</p>
-                <p className="mt-2 text-sm leading-6 text-[var(--foreground)]/68">{item.body}</p>
-              </div>
+              <MotionItem key={item.title}>
+                <div className="rounded-[1.25rem] border border-[var(--border)] bg-[var(--panel)] p-4">
+                  <p className="text-sm font-semibold text-[var(--foreground)]">{item.title}</p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--foreground)]/68">{item.body}</p>
+                </div>
+              </MotionItem>
             ))}
-          </div>
+          </MotionStagger>
         </div>
       </section>
 
-      <div className="mt-8 grid gap-4 lg:grid-cols-4">
+      <MotionStagger className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {[
           {
             label: "Total payouts",
@@ -219,22 +219,21 @@ export default function DashboardPage() {
             icon: <ArrowUpRight className="size-4 text-[var(--accent-2)]" />,
           },
         ].map((card) => (
-          <div
-            key={card.label}
-            className="rounded-[1.5rem] border border-[var(--border)] bg-white/85 p-4 shadow-[0_18px_40px_rgba(16,24,32,0.08)]"
-          >
-            <div className="flex items-center justify-between text-sm text-[var(--foreground)]/60">
-              {card.label}
-              {card.icon}
+          <MotionItem key={card.label}>
+            <div className="rounded-[1.5rem] border border-[var(--border)] bg-white/85 p-4 shadow-[0_18px_40px_rgba(16,24,32,0.08)]">
+              <div className="flex items-center justify-between text-sm text-[var(--foreground)]/60">
+                {card.label}
+                {card.icon}
+              </div>
+              <div className="mt-3 text-2xl font-semibold text-[var(--foreground)]">
+                {card.value}
+              </div>
             </div>
-            <div className="mt-3 text-2xl font-semibold text-[var(--foreground)]">
-              {card.value}
-            </div>
-          </div>
+          </MotionItem>
         ))}
-      </div>
+      </MotionStagger>
 
-      <div className="mt-8 grid gap-4 xl:grid-cols-[1.15fr,0.95fr,0.9fr]">
+      <MotionStagger className="mt-8 grid gap-4 xl:grid-cols-3">
         {[
           {
             eyebrow: "Operational posture",
@@ -244,7 +243,7 @@ export default function DashboardPage() {
           },
           {
             eyebrow: "Recommended flow",
-            title: "Run the hackathon demo in three clicks",
+            title: "Run a clean treasury review flow",
             body: "Create a payout, reveal it as the recipient, then share permit-scoped details with an auditor to show selective disclosure in action.",
             icon: <BriefcaseBusiness className="size-5 text-[var(--accent-3)]" />,
           },
@@ -255,24 +254,24 @@ export default function DashboardPage() {
             icon: <Clock3 className="size-5 text-[var(--accent-3)]" />,
           },
         ].map((panel) => (
-          <section
-            key={panel.title}
-            className="rounded-[1.6rem] border border-[var(--border)] bg-white/82 p-5 shadow-[0_18px_42px_rgba(16,24,32,0.08)]"
-          >
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(24,183,161,0.16),rgba(111,227,212,0.28))]">
-              {panel.icon}
-            </div>
-            <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">
-              {panel.eyebrow}
-            </p>
-            <h3 className="mt-3 text-xl font-semibold text-[var(--foreground)]">{panel.title}</h3>
-            <p className="mt-3 text-sm leading-6 text-[var(--foreground)]/70">{panel.body}</p>
-          </section>
+          <MotionItem key={panel.title}>
+            <section className="rounded-[1.6rem] border border-[var(--border)] bg-white/82 p-5 shadow-[0_18px_42px_rgba(16,24,32,0.08)]">
+              <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(24,183,161,0.16),rgba(111,227,212,0.28))]">
+                {panel.icon}
+              </div>
+              <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent-3)]">
+                {panel.eyebrow}
+              </p>
+              <h3 className="mt-3 text-xl font-semibold text-[var(--foreground)]">{panel.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-[var(--foreground)]/70">{panel.body}</p>
+            </section>
+          </MotionItem>
         ))}
-      </div>
+      </MotionStagger>
 
       <div className="mt-8 grid gap-4 xl:grid-cols-[1.15fr,0.85fr]">
-        <section className="rounded-[1.75rem] border border-[var(--border)] bg-[linear-gradient(135deg,rgba(233,247,244,0.95),rgba(255,255,255,0.9))] p-6">
+        <MotionFade delay={0.08}>
+          <section className="rounded-[1.75rem] border border-[var(--border)] bg-[linear-gradient(135deg,rgba(233,247,244,0.95),rgba(255,255,255,0.9))] p-6">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]">
             Privacy posture
           </p>
@@ -297,9 +296,11 @@ export default function DashboardPage() {
               Minimal public routing
             </div>
           </div>
-        </section>
+          </section>
+        </MotionFade>
 
-        <section className="rounded-[1.75rem] border border-[var(--border)] bg-white/82 p-6 shadow-[0_18px_42px_rgba(16,24,32,0.08)]">
+        <MotionFade delay={0.14}>
+          <section className="rounded-[1.75rem] border border-[var(--border)] bg-white/82 p-6 shadow-[0_18px_42px_rgba(16,24,32,0.08)]">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]">
             Action stack
           </p>
@@ -320,9 +321,10 @@ export default function DashboardPage() {
             ))}
           </div>
           <div className="mt-5 rounded-[1.25rem] border border-[var(--border)] bg-[linear-gradient(135deg,rgba(24,183,161,0.12),rgba(111,227,212,0.12))] p-4 text-sm text-[var(--foreground)]/72">
-            For the strongest judge flow, create one payout first so the inbox and disclosure pages show a live operational trail.
+            Create one live payout first so the inbox and disclosure pages show a real operational trail.
           </div>
-        </section>
+          </section>
+        </MotionFade>
       </div>
 
       <div className="mt-10 grid gap-4 xl:grid-cols-[1.3fr,0.9fr]">
