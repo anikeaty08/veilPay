@@ -54,16 +54,19 @@ export function PayoutCards({
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {[
-                ["Category", item.metadata?.category || entryKindLabels[item.summary.kind]],
-                ["Due date", formatTimestamp(item.summary.dueDate)],
-                ["Amount", revealedAmounts[item.summary.id] || "Encrypted until permit-based reveal"],
-                ["Record", `#${item.summary.id}`],
-                ["Workflow", item.metadata?.workflowStatus || "needs_review"],
-                ["Approvals", `${item.metadata?.approvalCount ?? 0}/${item.metadata?.requiredApprovals ?? 1}`],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-[1.1rem] border border-[var(--border)] bg-white/72 px-4 py-3">
-                  <p className="text-xs uppercase tracking-[0.14em] text-[var(--foreground)]/48">{label}</p>
-                  <p className="mt-2 text-sm font-medium text-[var(--foreground)]">{value}</p>
+                { label: "Category", value: item.metadata?.category || entryKindLabels[item.summary.kind] },
+                { label: "Due date", value: formatTimestamp(item.summary.dueDate) },
+                { label: "Amount", value: revealedAmounts[item.summary.id] || "Encrypted until permit-based reveal" },
+                { label: "Record", value: `#${item.summary.id}` },
+                { label: "Workflow", value: item.metadata?.workflowStatus || "needs_review" },
+                {
+                  label: "Approvals",
+                  value: `${item.metadata?.approvalCount ?? 0}/${item.metadata?.requiredApprovals ?? 1}`,
+                },
+              ].map((detail) => (
+                <div key={detail.label} className="rounded-[1.1rem] border border-[var(--border)] bg-white/72 px-4 py-3">
+                  <p className="text-xs uppercase tracking-[0.14em] text-[var(--foreground)]/48">{detail.label}</p>
+                  <p className="mt-2 text-sm font-medium text-[var(--foreground)]">{detail.value}</p>
                 </div>
               ))}
             </div>

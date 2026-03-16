@@ -120,15 +120,15 @@ export default function BatchPage() {
           </MotionFade>
 
           <MotionStagger className="grid gap-4 lg:grid-cols-2">
-            {details.map(([label, value, setter, placeholder]) => (
-              <MotionItem key={label}>
+            {details.map((item) => (
+              <MotionItem key={item[0]}>
                 <label className="block rounded-[1.5rem] border border-[var(--border)] bg-white/82 p-4 shadow-[var(--shadow-card)]">
-                  <span className="text-sm font-medium text-[var(--foreground)]">{label}</span>
+                  <span className="text-sm font-medium text-[var(--foreground)]">{item[0]}</span>
                   <input
                     className="mt-3 w-full rounded-[1rem] border border-[var(--border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--foreground)]/34"
-                    onChange={(event) => setter(event.target.value)}
-                    placeholder={placeholder}
-                    value={value}
+                    onChange={(event) => item[2](event.target.value)}
+                    placeholder={item[3]}
+                    value={item[1]}
                   />
                 </label>
               </MotionItem>

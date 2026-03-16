@@ -164,23 +164,23 @@ export default function CreatePage() {
               {step === 1 ? (
                 <div className="grid gap-4 lg:grid-cols-2">
                   {[
-                    ["Recipient wallet", "recipient", "0x..."],
-                    ["Organization slug", "organizationSlug", "north-star-dao"],
-                    ["Organization", "organizationName", "North Star DAO"],
-                    ["Team", "teamName", "Operations"],
-                    ["Cost center", "costCenter", "Treasury"],
-                    ["Label", "label", "April contractor payout"],
-                    ["Category", "category", "Contractor"],
-                    ["Amount", "amount", "4200.00"],
-                  ].map(([label, key, placeholder]) => (
-                    <label key={key} className="block rounded-[1.35rem] border border-[var(--border)] bg-[var(--panel-3)] p-4">
-                      <span className="text-sm font-medium text-[var(--foreground)]">{label}</span>
+                    { label: "Recipient wallet", key: "recipient", placeholder: "0x..." },
+                    { label: "Organization slug", key: "organizationSlug", placeholder: "north-star-dao" },
+                    { label: "Organization", key: "organizationName", placeholder: "North Star DAO" },
+                    { label: "Team", key: "teamName", placeholder: "Operations" },
+                    { label: "Cost center", key: "costCenter", placeholder: "Treasury" },
+                    { label: "Label", key: "label", placeholder: "April contractor payout" },
+                    { label: "Category", key: "category", placeholder: "Contractor" },
+                    { label: "Amount", key: "amount", placeholder: "4200.00" },
+                  ].map((item) => (
+                    <label key={item.key} className="block rounded-[1.35rem] border border-[var(--border)] bg-[var(--panel-3)] p-4">
+                      <span className="text-sm font-medium text-[var(--foreground)]">{item.label}</span>
                       <input
                         className="mt-3 w-full rounded-[1rem] border border-[var(--border)] bg-white/82 px-4 py-3 text-sm outline-none placeholder:text-[var(--foreground)]/35"
-                        onChange={(event) => updateField(key as keyof typeof initialForm, event.target.value)}
-                        placeholder={placeholder}
+                        onChange={(event) => updateField(item.key as keyof typeof initialForm, event.target.value)}
+                        placeholder={item.placeholder}
                         type="text"
-                        value={form[key as keyof typeof form]}
+                        value={form[item.key as keyof typeof form]}
                       />
                     </label>
                   ))}
@@ -218,22 +218,22 @@ export default function CreatePage() {
               {step === 2 ? (
                 <div className="grid gap-4 lg:grid-cols-2">
                   {[
-                    ["Token decimals", "tokenDecimals", "6"],
-                    ["Currency symbol", "currencySymbol", "USDC"],
-                    ["Required approvals", "requiredApprovals", "2"],
-                    ["Assigned reviewer", "assignedReviewer", "0x..."],
-                    ["Tags", "tags", "payroll,confidential"],
-                    ["Reference", "reference", "INV-042"],
-                    ["Attachment URL", "attachmentUrl", "https://"],
-                  ].map(([label, key, placeholder]) => (
-                    <label key={key} className="block rounded-[1.35rem] border border-[var(--border)] bg-[var(--panel-3)] p-4">
-                      <span className="text-sm font-medium text-[var(--foreground)]">{label}</span>
+                    { label: "Token decimals", key: "tokenDecimals", placeholder: "6" },
+                    { label: "Currency symbol", key: "currencySymbol", placeholder: "USDC" },
+                    { label: "Required approvals", key: "requiredApprovals", placeholder: "2" },
+                    { label: "Assigned reviewer", key: "assignedReviewer", placeholder: "0x..." },
+                    { label: "Tags", key: "tags", placeholder: "payroll,confidential" },
+                    { label: "Reference", key: "reference", placeholder: "INV-042" },
+                    { label: "Attachment URL", key: "attachmentUrl", placeholder: "https://" },
+                  ].map((item) => (
+                    <label key={item.key} className="block rounded-[1.35rem] border border-[var(--border)] bg-[var(--panel-3)] p-4">
+                      <span className="text-sm font-medium text-[var(--foreground)]">{item.label}</span>
                       <input
                         className="mt-3 w-full rounded-[1rem] border border-[var(--border)] bg-white/82 px-4 py-3 text-sm outline-none placeholder:text-[var(--foreground)]/35"
-                        onChange={(event) => updateField(key as keyof typeof initialForm, event.target.value)}
-                        placeholder={placeholder}
+                        onChange={(event) => updateField(item.key as keyof typeof initialForm, event.target.value)}
+                        placeholder={item.placeholder}
                         type="text"
-                        value={form[key as keyof typeof form]}
+                        value={form[item.key as keyof typeof form]}
                       />
                     </label>
                   ))}

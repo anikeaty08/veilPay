@@ -33,18 +33,18 @@ export default function Home() {
               </Link>
               <nav className="flex flex-wrap gap-2">
                 {[
-                  ["/dashboard", "Dashboard"],
-                  ["/create", "Create payout"],
-                  ["/batch", "Batch payroll"],
-                  ["/inbox", "Recipient inbox"],
-                  ["/disclosure", "Disclosure"],
-                ].map(([href, label]) => (
+                  { href: "/dashboard", label: "Dashboard" },
+                  { href: "/create", label: "Create payout" },
+                  { href: "/batch", label: "Batch payroll" },
+                  { href: "/inbox", label: "Recipient inbox" },
+                  { href: "/disclosure", label: "Disclosure" },
+                ].map((item) => (
                   <Link
-                    key={href}
+                    key={item.href}
                     className="rounded-full border border-[var(--border)] bg-white/82 px-4 py-2 text-sm font-medium text-[var(--foreground)]/78 transition hover:-translate-y-0.5"
-                    href={href}
+                    href={item.href}
                   >
-                    {label}
+                    {item.label}
                   </Link>
                 ))}
               </nav>
@@ -90,14 +90,23 @@ export default function Home() {
 
                 <MotionStagger className="mt-10 grid gap-3 sm:grid-cols-3">
                   {[
-                    ["What stays encrypted", "Amounts, allocations, and private notes stay protected."],
-                    ["What stays visible", "IDs, timestamps, status, and minimum routing metadata."],
-                    ["Why it matters", "Transparent rails leak salary bands, grants, and vendor rates."],
-                  ].map(([title, body]) => (
-                    <MotionItem key={title}>
+                    {
+                      title: "What stays encrypted",
+                      body: "Amounts, allocations, and private notes stay protected.",
+                    },
+                    {
+                      title: "What stays visible",
+                      body: "IDs, timestamps, status, and minimum routing metadata.",
+                    },
+                    {
+                      title: "Why it matters",
+                      body: "Transparent rails leak salary bands, grants, and vendor rates.",
+                    },
+                  ].map((item) => (
+                    <MotionItem key={item.title}>
                       <article className="rounded-[1.6rem] border border-[var(--border)] bg-white/76 p-4 shadow-[0_14px_28px_rgba(16,24,32,0.05)] backdrop-blur-xl">
-                        <h2 className="text-base font-semibold">{title}</h2>
-                        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{body}</p>
+                        <h2 className="text-base font-semibold">{item.title}</h2>
+                        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{item.body}</p>
                       </article>
                     </MotionItem>
                   ))}

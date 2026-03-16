@@ -100,17 +100,29 @@ export default function InboxPage() {
 
               <MotionStagger className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
                 {[
-                  ["Records in inbox", String(stats.total), <BellRing className="size-4 text-[var(--accent-3)]" key="a" />],
-                  ["Amounts revealed", String(stats.revealed), <Eye className="size-4 text-[var(--accent-3)]" key="b" />],
-                  ["Ready to claim", String(stats.claimable), <CheckCircle2 className="size-4 text-[var(--accent-3)]" key="c" />],
-                ].map(([label, value, icon]) => (
-                  <MotionItem key={label}>
+                  {
+                    label: "Records in inbox",
+                    value: String(stats.total),
+                    icon: <BellRing className="size-4 text-[var(--accent-3)]" />,
+                  },
+                  {
+                    label: "Amounts revealed",
+                    value: String(stats.revealed),
+                    icon: <Eye className="size-4 text-[var(--accent-3)]" />,
+                  },
+                  {
+                    label: "Ready to claim",
+                    value: String(stats.claimable),
+                    icon: <CheckCircle2 className="size-4 text-[var(--accent-3)]" />,
+                  },
+                ].map((item) => (
+                  <MotionItem key={item.label}>
                     <div className="rounded-[1.3rem] border border-[var(--border)] bg-white/82 px-4 py-4 shadow-[var(--shadow-card)]">
                       <div className="flex items-center justify-between text-sm text-[var(--muted)]">
-                        <span>{label}</span>
-                        {icon}
+                        <span>{item.label}</span>
+                        {item.icon}
                       </div>
-                      <p className="mt-3 text-2xl font-semibold text-[var(--foreground)]">{value}</p>
+                      <p className="mt-3 text-2xl font-semibold text-[var(--foreground)]">{item.value}</p>
                     </div>
                   </MotionItem>
                 ))}
