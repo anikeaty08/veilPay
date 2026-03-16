@@ -1,3 +1,4 @@
+import path from "path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -5,7 +6,9 @@ const nextConfig: NextConfig = {
     webpackBuildWorker: false,
   },
   turbopack: {
-    root: __dirname,
+    // Vercel sets `outputFileTracingRoot` to the repo root (e.g. `/vercel/path0`).
+    // Keep Turbopack aligned so builds don't loop on the mismatch warning.
+    root: path.resolve(__dirname, "../.."),
   },
   webpack: (config, { isServer }) => {
     config.experiments = {

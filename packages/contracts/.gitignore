@@ -4,6 +4,8 @@ node_modules
 # Hardhat files
 /cache
 /artifacts
+/.hardhat-appdata
+/.hardhat-localappdata
 
 # TypeChain files
 /typechain
